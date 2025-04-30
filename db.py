@@ -5,27 +5,38 @@ class InMemoryDB:
         self.database = {}
         self.transaction = None
 
+    # starting new transaction
     def begin_transaction(self):
+        # if already transaction then raises error
         if self.transaction is not None:
             raise Exception("Transaction already in progress.")
         self.transaction = {}
 
+    # sets a key-value pair only within active transaction
     def put(self, key, value):
+        # if none is active then raise error
         if self.transaction is None:
             raise Exception("No transaction in progress.")
+        # temporarily saving change
         self.transaction[key] = value
 
+    # gets value for key
     def get(self, key):
+        # if active and updated then return value
         if self.transaction and key in self.transaction:
             return self.transaction[key]
+        # otherwise return from orig commit
         return self.database.get(key, None)
     
+    # commit all changes to database
     def commit(self):
         if self.transaction is None:
             raise Exception("No transaction in progress.")
+        # apply changes to main database
         self.database.update(self.transaction)
         self.transaction = None
 
+    # cancels transaction and uncommitted changes
     def rollback(self):
         if self.transaction is None:
             raise Exception("No transaction in progress.")
